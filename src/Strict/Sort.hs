@@ -1,17 +1,11 @@
-module Sort where
+{-# LANGUAGE Strict #-}
+{-# LANGUAGE StrictData #-}
+
+module Strict.Sort where
 
 import Prelude
 
 import Data.List (unfoldr)
-
-bubbleSort :: [Int] -> [Int]
-bubbleSort [] = []
-bubbleSort (x:xs) = let (y, ys) = go x xs [] in y : bubbleSort ys
-  where
-    go y [] acc = (y, acc)
-    go y (z:zs) acc 
-      | y <= z    = go y zs (z:acc)
-      | otherwise = go z zs (y:acc)
 
 data Tree a = Null | Fork a (Tree a) (Tree a) deriving Show
 

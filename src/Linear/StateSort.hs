@@ -2,7 +2,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE QualifiedDo #-}
 
-module StateSort where
+module Linear.StateSort where
 
 import Data.Array.Mutable.Linear (Array)
 import qualified Data.Array.Mutable.Linear as Array

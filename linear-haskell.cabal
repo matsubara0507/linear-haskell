@@ -26,22 +26,24 @@ source-repository head
 library
   exposed-modules:
       Lib
+      Linear.Sort
+      Linear.SortedList
+      Linear.StateSort
       Sort
-      SortedList
-      StateSort
+      Strict.Sort
   other-modules:
       Paths_linear_haskell
   autogen-modules:
       Paths_linear_haskell
   hs-source-dirs:
       src
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -O2
   build-depends:
       base >=4.7 && <5
     , linear-base
   default-language: Haskell2010
 
-executable linear-haskell-exe
+executable bench
   main-is: Main.hs
   other-modules:
       Paths_linear_haskell
@@ -49,11 +51,13 @@ executable linear-haskell-exe
       Paths_linear_haskell
   hs-source-dirs:
       app
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -O2
   build-depends:
       base >=4.7 && <5
     , linear-base
     , linear-haskell
+    , random
+    , tasty-bench
   default-language: Haskell2010
 
 test-suite linear-haskell-test

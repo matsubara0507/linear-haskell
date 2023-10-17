@@ -3,7 +3,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleInstances, UndecidableInstances, MonoLocalBinds #-}
 
-module SortedList (SortedList, fromList) where
+module Linear.SortedList (SortedList, fromList) where
 
 import Prelude.Linear
 

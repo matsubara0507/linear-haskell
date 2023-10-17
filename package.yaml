@@ -35,17 +35,19 @@ ghc-options:
 
 library:
   source-dirs: src
+  ghc-options:
+  - -O2
 
 executables:
-  linear-haskell-exe:
+  bench:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
+    - -O2
     dependencies:
     - linear-haskell
+    - random
+    - tasty-bench
 
 tests:
   linear-haskell-test:
