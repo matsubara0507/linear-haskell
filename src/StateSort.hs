@@ -18,6 +18,13 @@ swap i j = Linear.do
   Ur jval <- state (Array.get j)
   modify (Array.set i jval . Array.set j ival)
 
+upto :: Int -> Int -> (Int -> SArray a ()) -> SArray a ()
+upto start end f = go start
+  where
+    go n
+      | n > end   = return ()
+      | otherwise = f n >> go (n + 1)
+
 downto :: Int -> Int -> (Int -> SArray a ()) -> SArray a ()
 downto start end f = go start
   where
@@ -58,3 +65,13 @@ maxIndex i j bottom
       Ur jval <- state (Array.get j)
       return $ Ur (if ival >= jval then i else j)
 
+bubbleSort :: [Int] -> [Int]
+bubbleSort = sortWith $ Linear.do
+  Ur len <- state Array.size
+  upto 0 (len - 1) $ \i ->
+    downto (len - 1) (i + 1) $ \j -> Linear.do
+      Ur n <- maxIndex j (j - 1) (len - 1)
+      if j == n then
+        return ()
+      else
+        swap j (j - 1)
