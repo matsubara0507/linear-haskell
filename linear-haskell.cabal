@@ -27,6 +27,7 @@ library
   exposed-modules:
       Lib
       Sort
+      StateSort
   other-modules:
       Paths_linear_haskell
   autogen-modules:
