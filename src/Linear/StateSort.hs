@@ -7,8 +7,9 @@ module Linear.StateSort where
 import Data.Array.Mutable.Linear (Array)
 import qualified Data.Array.Mutable.Linear as Array
 import Data.Unrestricted.Linear
-import Prelude.Linear hiding (partition)
+import Prelude.Linear hiding (partition, foldr)
 import Control.Functor.Linear as Linear
+import Data.Foldable (Foldable, foldr)
 
 type SArray a = State (Array a)
 
@@ -21,19 +22,23 @@ swap i j = Linear.do
   Ur jval <- state (Array.get j)
   modify (Array.set i jval . Array.set j ival)
 
+-- traverse_ :: (Foldable t, Applicative f) => (a -> f b) -> t a -> f ()
+-- traverse_ f = foldr c (pure ())
+--   where c x k = f x *> k
+--         {-# INLINE c #-}
+
+-- for_ :: (Foldable t, Applicative f) => t a -> (a -> f b) -> f ()
+-- {-# INLINE for_ #-}
+-- for_ = flip traverse_
+
 upto :: Int -> Int -> (Int -> SArray a ()) -> SArray a ()
-upto start end f = go start
-  where
-    go n
-      | n > end   = return ()
-      | otherwise = f n >> go (n + 1)
+upto start end f = 
+  foldM (\() n -> move n & \(Ur m) -> f m) () [start..end]
+  -- foldM (\() n -> f n) () [start..end]
 
 downto :: Int -> Int -> (Int -> SArray a ()) -> SArray a ()
-downto start end f = go start
-  where
-    go n
-      | n < end   = return ()
-      | otherwise = f n >> go (n - 1)
+downto start end f = 
+  foldM (\() n -> move n & \(Ur m) -> f m) () [start, (start-1)..end]
 
 heapSort :: [Int] -> [Int]
 heapSort = execSArray $ Linear.do
@@ -54,8 +59,51 @@ maxHeap root bottom = Linear.do
     swap root' root
     maxHeap child bottom
   where
-    left  = (root * 2) + 1;
-    right = (root * 2) + 2;
+    left  = (root * 2) + 1
+    right = (root * 2) + 2
+
+heapSort' :: [Int] -> [Int]
+heapSort' = execSArray $ Linear.do
+  Ur len <- state Array.size
+  downto ((len - 1) `div` 2) 0 $ \n ->
+    maxHeap' n (len - 1)
+  downto (len - 1) 1 $ \n -> Linear.do 
+    swap 0 n
+    maxHeap' 0 (n - 1)
+
+maxHeap' :: Int -> Int -> SArray Int ()
+maxHeap' root bottom = Linear.do
+  Ur index <- maxIndex' root
+  go root index
+  where
+    go :: Int -> Int -> SArray Int ()
+    go root' index 
+      | index == root' = return ()
+      | otherwise = Linear.do
+          swap root' index
+          Ur index' <- maxIndex' index
+          go index index'
+    maxIndex' :: Int -> SArray Int (Ur Int)
+    -- maxIndex' root' = Linear.do
+    --   Ur child <- maxIndex left right bottom
+    --   maxIndex root' child bottom
+    maxIndex' root' =
+      if left > bottom then
+        return (Ur root')
+      else Linear.do
+        Ur rootv <- state (Array.get root')
+        Ur leftv <- state (Array.get left)
+        if right > bottom then
+          return $ Ur (if rootv >= leftv then root' else left)
+        else Linear.do
+          Ur rightv <- state (Array.get right)
+          if leftv >= rightv then
+            return $ Ur (if rootv >= leftv then root' else left)
+          else
+            return $ Ur (if rootv >= rightv then root' else right)
+      where
+        left  = (root' * 2) + 1
+        right = (root' * 2) + 2
 
 maxIndex :: Int -> Int -> Int -> SArray Int (Ur Int)
 maxIndex i j bottom
@@ -70,8 +118,9 @@ bubbleSort = execSArray $ Linear.do
   Ur len <- state Array.size
   upto 0 (len - 1) $ \i ->
     downto (len - 1) (i + 1) $ \j -> Linear.do
-      Ur n <- maxIndex j (j - 1) (len - 1)
-      if j == n then
+      Ur jval  <- state (Array.get j)
+      Ur jval' <- state (Array.get (j - 1))
+      if jval > jval' then
         return ()
       else
         swap j (j - 1)
